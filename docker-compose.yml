@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: catalogo_web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:/data/local.db
+      - ADMIN_USER=${ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-password}
+      - DRIVE_CATALOG_FOLDER_ID=${DRIVE_CATALOG_FOLDER_ID}
+      - DRIVE_COVERS_FOLDER_ID=${DRIVE_COVERS_FOLDER_ID}
+      - DATA_DIR=/data
+      - DRIVE_CREDENTIALS_PATH=/data/credentials.json
+      - NEXT_PUBLIC_IMAGE_URL=http://localhost:8080 # Or your public proxy domain
+    volumes:
+      - catalogo_data:/data
+    networks:
+      - catalogo_network
+
+  nginx_images:
+    image: nginx:alpine
+    container_name: catalogo_nginx
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - catalogo_data:/usr/share/nginx/html:ro
+    networks:
+      - catalogo_network
+
+volumes:
+  catalogo_data:
+    driver: local
+
+networks:
+  catalogo_network:
+    driver: bridge

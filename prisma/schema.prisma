@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Modelos para la sincronización de Google Drive (estado del caché)
+model DriveItem {
+  id           String   @id @default(uuid())
+  driveId      String   @unique // ID en Google Drive
+  name         String
+  isDirectory  Boolean  @default(false)
+  parentId     String?  // ID del padre en Google Drive, nulo si es raíz
+  path         String   // Ruta completa reconstruida ej: "CATALOGO/PANTALONES/foto.jpg"
+  md5Checksum  String?  // Hash de Drive para fotos
+  lastModified DateTime? // Para saber si fue modificado
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  parent       DriveItem?  @relation("DirectoryChildren", fields: [parentId], references: [driveId], onDelete: Cascade)
+  children     DriveItem[] @relation("DirectoryChildren")
+}
+
+// Configuración global del administrador
+model Config {
+  id              String   @id @default("global") // Siempre será "global" para una sola fila
+  title           String   @default("Catálogo Web")
+  maintenanceMode Boolean  @default(false)
+  maintenanceMsg  String   @default("Sitio en mantenimiento. Regresaremos pronto.")
+  showAlbumNames  Boolean  @default(true)
+  updatedAt       DateTime @updatedAt
+}
+
+// Asignaciones de portadas a los álbumes
+model AlbumCover {
+  id            String   @id @default(uuid())
+  albumDriveId  String   @unique // El ID del DriveItem (carpeta)
+  coverFilename String   // Nombre del archivo de la portada en el volumen de covers
+  updatedAt     DateTime @updatedAt
+}
