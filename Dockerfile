@@ -23,7 +23,7 @@ RUN npx prisma generate
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Set a dummy database URL for build time pre-rendering
-ENV DATABASE_URL="file:./dummy.db"
+ENV DATABASE_URL="file:/app/dummy.db"
 RUN npx prisma db push --skip-generate
 
 # Build the project
