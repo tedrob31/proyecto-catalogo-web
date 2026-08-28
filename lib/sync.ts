@@ -6,7 +6,7 @@ import path from 'path';
 export const syncCatalog = async () => {
   const catalogFolderId = process.env.DRIVE_CATALOG_FOLDER_ID;
   const dataDir = process.env.DATA_DIR || './data';
-  const catalogLocalPath = path.join(dataDir, 'catalog');
+  const catalogLocalPath = process.env.IMAGES_DIR || path.join(dataDir, 'catalog');
 
   if (!catalogFolderId) {
     throw new Error('DRIVE_CATALOG_FOLDER_ID is not defined in environment variables');
@@ -79,14 +79,15 @@ export const syncCatalog = async () => {
         // Just a rename or move
         console.log(`Item renamed or moved: ${local.path} -> ${remote.path}`);
         
-        // Rename in filesystem if file exists
-        const oldDestPath = path.join(catalogLocalPath, local.path);
+        // Rename in filesystem if file exists (considering .webp extension)
+        const oldDestPath = path.join(catalogLocalPath, local.isDirectory ? local.path : local.path.replace(/\.[^/.]+$/, ".webp"));
+        const newDestPath = path.join(catalogLocalPath, remote.isDirectory ? remote.path : remote.path.replace(/\.[^/.]+$/, ".webp"));
         if (fs.existsSync(oldDestPath)) {
           // Ensure new parent directory exists
-          const newDir = path.dirname(destPath);
+          const newDir = path.dirname(newDestPath);
           if (!fs.existsSync(newDir)) fs.mkdirSync(newDir, { recursive: true });
           
-          fs.renameSync(oldDestPath, destPath);
+          fs.renameSync(oldDestPath, newDestPath);
         }
 
         // Update DB
@@ -106,7 +107,7 @@ export const syncCatalog = async () => {
     if (!processedDriveIds.has(local.driveId)) {
       console.log(`Item removed remotely: ${local.path}`);
       
-      const destPath = path.join(catalogLocalPath, local.path);
+      const destPath = path.join(catalogLocalPath, local.isDirectory ? local.path : local.path.replace(/\.[^/.]+$/, ".webp"));
       
       // Delete from filesystem
       if (fs.existsSync(destPath)) {

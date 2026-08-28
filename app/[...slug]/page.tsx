@@ -61,9 +61,10 @@ export default async function FolderPage({
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {items.map((item) => {
             const isFolder = item.isDirectory;
+            const imgPath = isFolder ? '' : item.path.replace(/\.[^/.]+$/, ".webp");
             const imgUrl = isFolder 
               ? '/placeholder-album.png'
-              : `${imageServer}/catalog/${item.path}`;
+              : `${imageServer}/catalog/${imgPath}`;
 
             return (
               <Link 
@@ -81,7 +82,7 @@ export default async function FolderPage({
                     className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
-                {(isFolder && config?.showAlbumNames ?? true) && (
+                {isFolder && (config?.showAlbumNames ?? true) && (
                   <p className="mt-2 text-sm text-zinc-300 font-medium truncate px-1">
                     {item.name}
                   </p>

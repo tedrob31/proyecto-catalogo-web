@@ -59,9 +59,10 @@ export default async function CatalogRoot({
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {items.map((item) => {
             const isFolder = item.isDirectory;
+            const imgPath = isFolder ? '' : item.path.replace(/\.[^/.]+$/, ".webp");
             const imgUrl = isFolder 
               ? '/placeholder-album.png' // We will integrate album covers later
-              : `${imageServer}/catalog/${item.path}`;
+              : `${imageServer}/catalog/${imgPath}`;
 
             return (
               <Link 

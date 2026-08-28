@@ -60,27 +60,41 @@ export const listDriveFolder = async (folderId: string, parentPath: string = '')
   return files;
 };
 
+import sharp from 'sharp';
+
 // Download a file from Drive
 export const downloadDriveFile = async (fileId: string, destPath: string) => {
   const drive = getDriveService();
   
+  // Convert destination path to .webp
+  const parsedPath = path.parse(destPath);
+  const webpDestPath = path.join(parsedPath.dir, `${parsedPath.name}.webp`);
+
   // Ensure the directory exists
-  const destDir = path.dirname(destPath);
+  const destDir = path.dirname(webpDestPath);
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
   }
 
-  const dest = fs.createWriteStream(destPath);
-  
   const res = await drive.files.get(
     { fileId, alt: 'media' },
     { responseType: 'stream' }
   );
 
+  const transformer = sharp()
+    .resize({
+      width: 800,
+      height: 1000,
+      fit: 'inside',
+      withoutEnlargement: true
+    })
+    .webp({ quality: 80 });
+
   return new Promise<void>((resolve, reject) => {
     res.data
-      .on('end', () => resolve())
-      .on('error', (err: any) => reject(err))
-      .pipe(dest);
+      .pipe(transformer)
+      .pipe(fs.createWriteStream(webpDestPath))
+      .on('finish', () => resolve())
+      .on('error', (err: any) => reject(err));
   });
 };
