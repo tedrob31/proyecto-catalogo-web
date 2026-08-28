@@ -6,7 +6,7 @@ import path from 'path';
 const getDriveService = () => {
   const credentialsPath = process.env.DRIVE_CREDENTIALS_PATH || './data/credentials.json';
   
-  if (!fs.existsSync(credentialsPath)) {
+  if (!fs.existsSync(/*turbopackIgnore: true*/ credentialsPath)) {
     throw new Error(`Credentials file not found at ${credentialsPath}`);
   }
 
