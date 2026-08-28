@@ -57,9 +57,9 @@ services:
         - traefik.enable=true
         - traefik.docker.network=r4tlabsnet
         
-        # Router unificado para todo lo dinámico con prioridad máxima
-        - "traefik.http.routers.r4t-backend-${COMPOSE_PROJECT_NAME:-catsite}.rule=(Host(`${DOMAIN_NAME:-r4tlabs.com}`) || Host(`www.${DOMAIN_NAME:-r4tlabs.com}`)) && (PathPrefix(`/modaaadmin`) || PathPrefix(`/api`) || PathPrefix(`/_next`))"
-        - "traefik.http.routers.r4t-backend-${COMPOSE_PROJECT_NAME:-catsite}.priority=50000"
+        # Router para Next.js (responde a todo por defecto)
+        - "traefik.http.routers.r4t-backend-${COMPOSE_PROJECT_NAME:-catsite}.rule=(Host(`${DOMAIN_NAME:-r4tlabs.com}`) || Host(`www.${DOMAIN_NAME:-r4tlabs.com}`))"
+        - "traefik.http.routers.r4t-backend-${COMPOSE_PROJECT_NAME:-catsite}.priority=1000"
         - "traefik.http.routers.r4t-backend-${COMPOSE_PROJECT_NAME:-catsite}.entrypoints=websecure"
         - "traefik.http.routers.r4t-backend-${COMPOSE_PROJECT_NAME:-catsite}.tls.certresolver=letsencryptresolver"
         - "traefik.http.routers.r4t-backend-${COMPOSE_PROJECT_NAME:-catsite}.service=backend_api-${COMPOSE_PROJECT_NAME:-catsite}"
@@ -90,9 +90,9 @@ services:
         - traefik.enable=true
         - traefik.docker.network=r4tlabsnet
         
-        # REGLA DE EXCLUSIÓN: Nginx solo responde si NO es una ruta de backend
-        - "traefik.http.routers.r4t-static-${COMPOSE_PROJECT_NAME:-catsite}.rule=(Host(`${DOMAIN_NAME:-r4tlabs.com}`) || Host(`www.${DOMAIN_NAME:-r4tlabs.com}`)) && !PathPrefix(`/modaaadmin`) && !PathPrefix(`/api`) && !PathPrefix(`/_next`)"
-        - "traefik.http.routers.r4t-static-${COMPOSE_PROJECT_NAME:-catsite}.priority=1000"
+        # REGLA DE INCLUSIÓN: Nginx solo responde a la ruta /catalog (alta prioridad)
+        - "traefik.http.routers.r4t-static-${COMPOSE_PROJECT_NAME:-catsite}.rule=(Host(`${DOMAIN_NAME:-r4tlabs.com}`) || Host(`www.${DOMAIN_NAME:-r4tlabs.com}`)) && PathPrefix(`/catalog`)"
+        - "traefik.http.routers.r4t-static-${COMPOSE_PROJECT_NAME:-catsite}.priority=50000"
         - "traefik.http.routers.r4t-static-${COMPOSE_PROJECT_NAME:-catsite}.entrypoints=websecure"
         - "traefik.http.routers.r4t-static-${COMPOSE_PROJECT_NAME:-catsite}.tls.certresolver=letsencryptresolver"
         - "traefik.http.routers.r4t-static-${COMPOSE_PROJECT_NAME:-catsite}.service=static_server-${COMPOSE_PROJECT_NAME:-catsite}"

@@ -5,7 +5,7 @@ export async function middleware(request: NextRequest) {
   const url = request.nextUrl.pathname;
 
   // 1. Admin Authentication
-  if (url.startsWith('/modaaadmin')) {
+  if (url.startsWith('/modaadmin')) {
     const authHeader = request.headers.get('authorization');
     const expectedUser = process.env.ADMIN_USER || 'admin';
     const expectedPassword = process.env.ADMIN_PASSWORD || 'password';
@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
 
   // 2. Maintenance Mode Check
   // We skip this check for static assets and the admin panel itself
-  if (!url.startsWith('/modaaadmin') && !url.startsWith('/_next') && !url.match(/\.(png|jpg|jpeg|gif|webp|svg|ico)$/)) {
+  if (!url.startsWith('/modaadmin') && !url.startsWith('/_next') && !url.match(/\.(png|jpg|jpeg|gif|webp|svg|ico)$/)) {
     // Note: Since middleware runs on edge by default, querying SQLite directly here using Prisma is NOT supported on Edge runtime.
     // So we fetch an API endpoint or use a local fetch workaround, but simple fetch to our own API might be slow.
     // For now, we will handle maintenance mode via a React Layout Server Component which DOES support SQLite,
